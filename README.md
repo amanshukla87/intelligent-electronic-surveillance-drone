@@ -2,7 +2,7 @@
 
 **Summer Research Internship | Indian Institute of Technology Jodhpur (IIT Jodhpur) | 2026**
 
-A research and engineering project focused on the development of a camera-integrated hexacopter platform for aerial surveillance, combining drone hardware integration, embedded computing, computer vision and deep-learning-based object detection.
+A research and engineering project focused on the development of a camera-integrated hexacopter platform for aerial surveillance, combining drone hardware integration, embedded computing, computer vision, image classification, and deep-learning-based object detection.
 
 ---
 
