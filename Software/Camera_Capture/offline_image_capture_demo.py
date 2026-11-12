@@ -37,7 +37,8 @@ camera = cv2.VideoCapture(0)
 
 if not camera.isOpened():
     print("[ERROR] Camera could not be accessed.")
-    raise SystemExit
+    camera.release()
+    raise SystemExit(1)
 
 print("[SUCCESS] Camera initialized.")
 print("[INFO] Internet connection: NOT REQUIRED")
@@ -49,52 +50,63 @@ print("=" * 55)
 # AUTOMATED IMAGE ACQUISITION
 # ==========================================
 
+captured_count = 0
+capture_completed = False
+
 try:
-
     for count in range(1, TOTAL_IMAGES + 1):
-
         ret, frame = camera.read()
 
         if not ret:
             print("[ERROR] Image acquisition failed.")
             break
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         filename = f"Drone_Image_{count:03d}_{timestamp}.jpg"
-
         image_path = SAVE_DIR / filename
 
         # Save image directly to local storage
-        cv2.imwrite(str(image_path), frame)
+        if not cv2.imwrite(str(image_path), frame):
+            print(f"[ERROR] Failed to save image: {filename}")
+            break
 
-        print(f"[CAPTURED] Image {count:02d}/{TOTAL_IMAGES}")
+        captured_count += 1
+
+        print(f"[CAPTURED] Image {captured_count:02d}/{TOTAL_IMAGES}")
         print(f"[SAVED] {filename}")
-        print(f"[STORAGE] Local SD/Drive simulation")
+        print("[STORAGE] Local computer filesystem")
         print("-" * 55)
 
         # Display captured camera frame
         cv2.imshow("Offline Image Capture - Camera", frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        if cv2.waitKey(1) & 0xFF == ord("q"):
             print("[INFO] Capture stopped by user.")
             break
 
         if count < TOTAL_IMAGES:
             time.sleep(CAPTURE_INTERVAL)
+    else:
+        capture_completed = True
 
     print("\n" + "=" * 55)
-    print("       IMAGE CAPTURE COMPLETED")
+    print("       IMAGE CAPTURE SUMMARY")
     print("=" * 55)
-
-    print("[SUCCESS] Images stored locally.")
-    print("[TOTAL] Images captured:",
-          len(list(SAVE_DIR.glob("*.jpg"))))
+    print(f"[TOTAL] Images captured in this run: {captured_count}")
     print("[FOLDER]", SAVE_DIR)
-    print("[STATUS] Offline storage demonstration complete.")
+
+    if capture_completed:
+        print("[STATUS] All scheduled images captured successfully.")
+    else:
+        print("[STATUS] Capture ended before all scheduled images were captured.")
 
 except KeyboardInterrupt:
-    print("\n[INFO] Capture interrupted.")
+    print("\n[INFO] Capture interrupted by user.")
+    print(f"[TOTAL] Images captured in this run: {captured_count}")
+
+except Exception as error:
+    print(f"[ERROR] Unexpected capture error: {error}")
+    print(f"[TOTAL] Images captured in this run: {captured_count}")
 
 finally:
     camera.release()
